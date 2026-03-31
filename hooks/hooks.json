@@ -1,0 +1,16 @@
+{
+  "description": "Spec Loop stop hook — keeps Claude iterating through spec refinement and implementation phases",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-hook.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

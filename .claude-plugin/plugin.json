@@ -1,0 +1,11 @@
+{
+  "name": "spec-loop",
+  "version": "1.0.0",
+  "description": "Two-phase autonomous AI loop: refine specifications into machine-verifiable criteria, then implement them iteratively. Inspired by Ralph Loop with spec-first thinking.",
+  "author": {
+    "name": "specloop"
+  },
+  "repository": "https://github.com/specloop/spec-loop",
+  "license": "MIT",
+  "keywords": ["spec-loop", "ralph-loop", "autonomous", "specification", "iteration", "loop"]
+}

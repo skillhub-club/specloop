@@ -1,14 +1,36 @@
 # Spec Loop
 
-An autonomous two-phase AI coding loop that refines specifications before implementing them.
+A Claude Code plugin that runs an autonomous two-phase AI loop: refine specifications into machine-verifiable criteria, then implement them iteratively.
 
 Inspired by the [Ralph Loop](https://github.com/snarktank/ralph) pattern — but instead of jumping straight to code, Spec Loop first ensures your specs are tight, verifiable, and right-sized.
 
-## Why?
+## Install
 
-Ralph Loop showed that fresh-context iteration beats long conversations. But garbage specs in → garbage code out, no matter how many iterations you run.
+```bash
+# From Claude Code marketplace (coming soon)
+/plugin marketplace add specloop/spec-loop
 
-Spec Loop adds a **spec refinement phase** that rewrites vague acceptance criteria into machine-verifiable checks *before* a single line of code is written. The result: fewer wasted iterations, clearer exit conditions, and code that actually matches intent.
+# Or install manually
+/plugin install /path/to/specloop
+```
+
+## Quick Start
+
+```bash
+# 1. Generate a spec from a feature idea
+/spec Add priority levels to tasks
+
+# 2. Start the loop (refine specs → implement)
+/spec-loop Implement the priority feature
+
+# 3. Monitor progress
+/spec-loop-status
+
+# 4. Cancel if needed
+/cancel-spec-loop
+```
+
+That's it. Spec Loop will keep Claude running — refining your specs, then implementing stories one by one — until everything passes.
 
 ## How It Works
 
@@ -18,24 +40,23 @@ Spec Loop adds a **spec refinement phase** that rewrites vague acceptance criter
 │                                                     │
 │  Phase 1: Spec Refinement                          │
 │  ┌───────────────────────────────────────────────┐  │
-│  │ while stories have refined: false             │  │
-│  │   1. Fresh Claude instance reads spec.json    │  │
+│  │ Stop hook keeps Claude iterating:             │  │
+│  │   1. Reads spec.json + codebase              │  │
 │  │   2. Identifies vague/untestable criteria     │  │
 │  │   3. Rewrites to be machine-verifiable        │  │
 │  │   4. Adds validationCommand per story         │  │
 │  │   5. Marks refined: true                      │  │
-│  │   → exits when all stories refined            │  │
+│  │   → <promise>SPEC_COMPLETE</promise>          │  │
 │  └───────────────────────────────────────────────┘  │
 │                       ↓                             │
 │  Phase 2: Implementation                           │
 │  ┌───────────────────────────────────────────────┐  │
-│  │ while stories have passes: false              │  │
-│  │   1. Fresh Claude instance reads spec.json    │  │
-│  │   2. Reads guardrails.md (failure signs)      │  │
-│  │   3. Picks highest-priority incomplete story  │  │
-│  │   4. Implements, tests, validates             │  │
-│  │   5. Commits + records learnings              │  │
-│  │   → exits when all stories pass               │  │
+│  │ Stop hook keeps Claude iterating:             │  │
+│  │   1. Reads guardrails.md (failure signs)      │  │
+│  │   2. Picks highest-priority incomplete story  │  │
+│  │   3. Implements, tests, validates             │  │
+│  │   4. Commits + records learnings              │  │
+│  │   → <promise>COMPLETE</promise>               │  │
 │  └───────────────────────────────────────────────┘  │
 │                                                     │
 │  Memory between iterations:                        │
@@ -43,61 +64,63 @@ Spec Loop adds a **spec refinement phase** that rewrites vague acceptance criter
 └─────────────────────────────────────────────────────┘
 ```
 
-Each iteration spawns a **fresh Claude Code instance** with clean context. No context rot. No accumulated confusion. The filesystem is the memory.
+The **Stop hook** intercepts Claude's exit attempts and re-feeds the prompt, creating a self-referential loop. Claude sees its previous work in files and git, giving it fresh context each iteration without context rot.
 
-## Quick Start
+## Commands
 
-### 1. Install dependencies
+| Command | Description |
+|---------|-------------|
+| `/spec [description]` | Generate a spec.json from a feature idea |
+| `/spec-loop [prompt] [options]` | Start the autonomous loop |
+| `/spec-loop-status` | Show current progress |
+| `/cancel-spec-loop` | Cancel an active loop |
+
+### /spec-loop Options
+
+```
+--max-iterations N   Max total iterations (default: unlimited)
+--skip-spec          Skip Phase 1, go straight to implementation
+--skip-impl          Only refine specs, don't implement
+```
+
+### Examples
 
 ```bash
-npm install -g @anthropic-ai/claude-code  # Claude Code CLI
-brew install jq                            # JSON processor
+# Full loop: refine specs → implement all stories
+/spec-loop Implement the user dashboard feature
+
+# Already have good specs? Skip refinement
+/spec-loop --skip-spec Implement all stories from spec.json
+
+# Just refine, review before implementing
+/spec-loop --skip-impl Review and tighten the spec
+
+# Safety limit on iterations
+/spec-loop --max-iterations 20 Build the priority system
 ```
 
-### 2. Create a spec
-
-Copy the example and edit it for your project:
-
-```bash
-cp spec.json.example spec.json
-# Edit spec.json with your feature stories
-```
-
-Or use the `/spec` skill to generate one interactively:
+## Plugin Structure
 
 ```
-/spec
-> Add priority levels to tasks so users can sort by urgency
+spec-loop/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest
+├── commands/
+│   ├── spec-loop.md             # /spec-loop command
+│   ├── spec.md                  # /spec command
+│   ├── spec-loop-status.md      # /spec-loop-status command
+│   └── cancel-spec-loop.md      # /cancel-spec-loop command
+├── hooks/
+│   ├── hooks.json               # Stop hook registration
+│   └── stop-hook.sh             # Loop continuation logic
+├── scripts/
+│   ├── setup-spec-loop.sh       # Loop initialization
+│   └── prompts/
+│       ├── spec-refine.md       # Phase 1 prompt template
+│       └── implement.md         # Phase 2 prompt template
+├── spec.json.example            # Example spec format
+└── README.md
 ```
-
-### 3. Run the loop
-
-```bash
-# Full loop: refine specs, then implement
-./scripts/specloop.sh
-
-# Skip spec refinement (your specs are already solid)
-./scripts/specloop.sh --skip-spec
-
-# Only refine specs, don't implement yet
-./scripts/specloop.sh --skip-impl
-
-# Custom iteration limits
-./scripts/specloop.sh --spec-iterations 5 --impl-iterations 20
-```
-
-## File Structure
-
-| File | Purpose |
-|------|---------|
-| `spec.json` | Your feature specification (stories + criteria + status) |
-| `progress.md` | Append-only iteration journal (learnings persist across iterations) |
-| `guardrails.md` | Discovered patterns + failure "Signs" (anti-regression memory) |
-| `scripts/specloop.sh` | Main orchestrator |
-| `scripts/spec-refine-prompt.md` | Phase 1 prompt |
-| `scripts/implement-prompt.md` | Phase 2 prompt |
-| `skills/spec/prompt.md` | `/spec` skill — generate spec.json |
-| `skills/specloop/prompt.md` | `/specloop` skill — manage the loop |
 
 ## spec.json Format
 
@@ -131,7 +154,7 @@ Or use the `/spec` skill to generate one interactively:
 
 ## Story Sizing
 
-Each story should be completable in one context window. Rule of thumb:
+Each story should be completable in one context window:
 
 | Size | Example | Verdict |
 |------|---------|---------|
@@ -152,15 +175,21 @@ When an iteration fails, the agent writes a **Sign** to `guardrails.md`:
 
 Future iterations read guardrails first, avoiding the same mistakes. This is the loop's "hippocampus" — file-based learning across fresh contexts.
 
-## Comparison with Ralph
+## Comparison with Ralph Loop
 
-| | Ralph | Spec Loop |
+| | Ralph Loop | Spec Loop |
 |---|---|---|
 | Spec creation | Manual PRD | Iterative refinement loop |
 | Criteria quality | Human-dependent | Machine-verified to be testable |
-| Phases | 1 (implementation) | 2 (refine + implement) |
-| Per-story validation | Project-level checks only | `validationCommand` per story |
+| Phases | 1 (implement) | 2 (refine + implement) |
+| Per-story validation | Project-level checks | `validationCommand` per story |
 | Failure memory | `progress.txt` | Structured "Signs" in `guardrails.md` |
+| Distribution | Plugin or bash script | Claude Code plugin with Stop hook |
+| Phase transitions | Manual | Automatic (stop hook handles it) |
+
+## Also Available: Standalone Script
+
+If you prefer the bash-script approach (spawning separate Claude processes), the `scripts/specloop.sh` orchestrator is also included. See [CLAUDE.md](CLAUDE.md) for standalone usage.
 
 ## Credits
 

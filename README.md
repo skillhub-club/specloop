@@ -4,14 +4,17 @@ A Claude Code plugin that runs an autonomous two-phase AI loop: refine specifica
 
 Inspired by the [Ralph Loop](https://github.com/snarktank/ralph) pattern — but instead of jumping straight to code, Spec Loop first ensures your specs are tight, verifiable, and right-sized.
 
+**[Live Demo](https://skillhub-club.github.io/specloop/)** — interactive flowchart showing the two-phase loop in action.
+
 ## Install
 
 ```bash
-# From Claude Code marketplace (coming soon)
-/plugin marketplace add specloop/spec-loop
+# From GitHub
+/plugin install skillhub-club/specloop
 
-# Or install manually
-/plugin install /path/to/specloop
+# Or clone locally
+git clone https://github.com/skillhub-club/specloop.git
+/plugin install ./specloop
 ```
 
 ## Quick Start

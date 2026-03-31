@@ -1,0 +1,129 @@
+{
+  "project": "TaskFlow API",
+  "branchName": "specloop/task-api",
+  "description": "Build a complete task management REST API with CRUD, priority, assignment, filtering, pagination, validation, and API key auth",
+  "checkCommands": {
+    "test": "npm test"
+  },
+  "stories": [
+    {
+      "id": "S-001",
+      "title": "CRUD endpoints for tasks",
+      "priority": 1,
+      "acceptanceCriteria": [
+        "POST /api/tasks with { title } returns 201 with { data: { id, title, description, status, created_at, updated_at } } where status defaults to 'todo' and description defaults to ''",
+        "GET /api/tasks returns 200 with { data: [...] } containing all tasks; GET /api/tasks/:id returns 200 with { data: {...} } for existing task or 404 with { error: string } for non-existent id",
+        "PUT /api/tasks/:id updates provided fields (title, description, status) and returns 200 with { data: {...} } including updated updated_at; returns 404 for non-existent id; returns 400 if status is not one of 'todo', 'in_progress', 'done'",
+        "DELETE /api/tasks/:id returns 204 with no body for existing task, 404 with { error: string } for non-existent id",
+        "POST /api/tasks with missing or empty title returns 400 with { error: string }",
+        "Tests in tests/tasks.test.ts cover all CRUD operations including 201, 200, 204, 400, and 404 responses"
+      ],
+      "validationCommand": "npm test -- tests/tasks.test.ts",
+      "refined": true,
+      "passes": true
+    },
+    {
+      "id": "S-002",
+      "title": "Priority field with enum constraint",
+      "priority": 2,
+      "acceptanceCriteria": [
+        "Tasks table has a 'priority' column accepting values: 'low', 'medium', 'high', 'urgent' with default 'medium'",
+        "POST /api/tasks without priority field creates task with priority 'medium'; POST with explicit priority persists it",
+        "PUT /api/tasks/:id accepts priority field and persists the change; returns updated task with new priority",
+        "POST or PUT with priority value not in ('low', 'medium', 'high', 'urgent') returns 400 with { error: string }",
+        "Tests in tests/priority.test.ts verify default priority, explicit setting, update, and invalid value rejection"
+      ],
+      "validationCommand": "npm test -- tests/priority.test.ts",
+      "refined": true,
+      "passes": true
+    },
+    {
+      "id": "S-003",
+      "title": "Assignee field with user tracking",
+      "priority": 3,
+      "acceptanceCriteria": [
+        "Tasks table has 'assigned_to' column (nullable string); POST and PUT /api/tasks accept assigned_to field; GET endpoints include assigned_to in response",
+        "POST /api/tasks/:id/assign with { assigned_to: string } updates the task and returns 200 with { data: {...} }; returns 404 if task does not exist",
+        "POST /api/tasks/:id/unassign sets assigned_to to null and returns 200 with { data: {...} }; returns 404 if task does not exist",
+        "Tests in tests/assignee.test.ts verify assignment via POST/PUT, dedicated assign/unassign endpoints, 404 on non-existent task, and that assigned_to appears in GET responses"
+      ],
+      "validationCommand": "npm test -- tests/assignee.test.ts",
+      "refined": true,
+      "passes": true
+    },
+    {
+      "id": "S-004",
+      "title": "Filtering tasks by status, priority, and assignee",
+      "priority": 4,
+      "acceptanceCriteria": [
+        "GET /api/tasks?status=todo returns only tasks matching that status value",
+        "GET /api/tasks?priority=high returns only tasks matching that priority; GET /api/tasks?assigned_to=alice returns only tasks assigned to that value",
+        "Multiple filters combine with AND logic: GET /api/tasks?status=todo&priority=high returns tasks matching both",
+        "Unrecognized filter keys and invalid filter values do not cause errors — they are silently ignored and return unfiltered results for that dimension",
+        "Tests in tests/filtering.test.ts verify each filter individually, combined filters, and that invalid filter values don't error"
+      ],
+      "validationCommand": "npm test -- tests/filtering.test.ts",
+      "refined": true,
+      "passes": true
+    },
+    {
+      "id": "S-005",
+      "title": "Pagination with limit and offset",
+      "priority": 5,
+      "acceptanceCriteria": [
+        "GET /api/tasks accepts ?limit=N&offset=M query parameters; default limit is 20, default offset is 0; limit is capped at 100",
+        "Response shape changes to { data: [...], meta: { total: number, limit: number, offset: number, hasMore: boolean } } where total is the count before pagination and hasMore indicates more results exist",
+        "Non-numeric or negative limit/offset values fall back to defaults rather than causing errors",
+        "Pagination works correctly when combined with filter query parameters from S-004",
+        "Tests in tests/pagination.test.ts verify default pagination, custom limit/offset, hasMore flag accuracy, max limit cap, and interaction with filters"
+      ],
+      "validationCommand": "npm test -- tests/pagination.test.ts",
+      "refined": true,
+      "passes": true
+    },
+    {
+      "id": "S-006",
+      "title": "Sorting tasks by multiple fields",
+      "priority": 6,
+      "acceptanceCriteria": [
+        "GET /api/tasks accepts ?sort=field&order=asc|desc; allowed sort fields are: created_at, updated_at, priority, title; default is created_at desc",
+        "Priority sorts by semantic urgency order (urgent > high > medium > low), not alphabetically",
+        "Invalid sort field or order value silently falls back to default sort (created_at desc)",
+        "Sorting works correctly when combined with filter and pagination parameters",
+        "Tests in tests/sorting.test.ts verify sorting by each field in both directions, priority urgency ordering, and invalid sort fallback"
+      ],
+      "validationCommand": "npm test -- tests/sorting.test.ts",
+      "refined": true,
+      "passes": true
+    },
+    {
+      "id": "S-007",
+      "title": "API key authentication middleware",
+      "priority": 7,
+      "acceptanceCriteria": [
+        "Middleware on all /api/* routes checks for X-API-Key header; valid key (from env var API_KEY, defaulting to 'dev-key-123') allows request through",
+        "Missing X-API-Key header returns 401 with { error: 'Unauthorized' }; invalid key value returns 401 with { error: 'Unauthorized' }",
+        "GET /health is exempt from authentication and remains publicly accessible",
+        "All existing test files for /api/* routes must include X-API-Key header in requests to continue passing",
+        "Tests in tests/auth.test.ts verify: request with valid key succeeds, request with missing key returns 401, request with wrong key returns 401, /health without key returns 200"
+      ],
+      "validationCommand": "npm test -- tests/auth.test.ts",
+      "refined": true,
+      "passes": true
+    },
+    {
+      "id": "S-008",
+      "title": "Task statistics endpoint",
+      "priority": 8,
+      "acceptanceCriteria": [
+        "GET /api/stats returns 200 with { data: { total: number, byStatus: { todo: number, in_progress: number, done: number }, byPriority: { low: number, medium: number, high: number, urgent: number }, unassigned: number } }",
+        "All counts are accurate and reflect current database state (verified by creating known tasks and asserting counts)",
+        "Endpoint requires authentication (X-API-Key header) consistent with S-007",
+        "Tests in tests/stats.test.ts create tasks with various status/priority/assignee combinations and verify all counts in the response"
+      ],
+      "validationCommand": "npm test -- tests/stats.test.ts",
+      "refined": true,
+      "passes": true
+    }
+  ]
+}

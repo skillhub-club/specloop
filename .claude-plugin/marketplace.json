@@ -1,0 +1,23 @@
+{
+  "name": "specloop-marketplace",
+  "owner": {
+    "name": "skillhub-club"
+  },
+  "metadata": {
+    "description": "Two-phase autonomous AI loop for Claude Code: refine specs into machine-verifiable criteria, then implement them iteratively. Inspired by Ralph Loop with spec-first thinking.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "spec-loop",
+      "source": "./",
+      "description": "Autonomous spec refinement and implementation loop with Stop hook for long-running sessions",
+      "version": "1.0.0",
+      "keywords": ["spec-loop", "ralph-loop", "autonomous", "specification", "iteration", "loop", "implementation"],
+      "category": "productivity",
+      "skills": "./skills/",
+      "commands": "./commands/",
+      "hooks": "./hooks/"
+    }
+  ]
+}

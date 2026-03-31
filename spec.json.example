@@ -1,0 +1,74 @@
+{
+  "project": "MyApp",
+  "branchName": "specloop/task-priority",
+  "description": "Add priority levels to tasks so users can organize by urgency",
+  "checkCommands": {
+    "typecheck": "npm run typecheck",
+    "lint": "npm run lint",
+    "test": "npm test"
+  },
+  "stories": [
+    {
+      "id": "S-001",
+      "title": "Add priority field to task model",
+      "priority": 1,
+      "acceptanceCriteria": [
+        "Database migration adds 'priority' column with enum type: 'high' | 'medium' | 'low'",
+        "Default value is 'medium'",
+        "Existing tasks are migrated with 'medium' priority",
+        "TypeScript Task type includes priority field",
+        "Unit test verifies priority field defaults and constraints"
+      ],
+      "validationCommand": "npm test -- --grep 'priority model'",
+      "refined": true,
+      "passes": false
+    },
+    {
+      "id": "S-002",
+      "title": "Display priority badges on task cards",
+      "priority": 2,
+      "acceptanceCriteria": [
+        "Task card component shows a colored badge for priority",
+        "High = red badge, Medium = yellow badge, Low = gray badge",
+        "Badge text shows the priority level name",
+        "Badge is visible in the task list view",
+        "Component test verifies correct badge color per priority level"
+      ],
+      "validationCommand": "npm test -- --grep 'priority badge'",
+      "refined": true,
+      "passes": false
+    },
+    {
+      "id": "S-003",
+      "title": "Add priority selector to task edit form",
+      "priority": 3,
+      "acceptanceCriteria": [
+        "Task edit form includes a dropdown/select for priority",
+        "Dropdown shows all three options: High, Medium, Low",
+        "Selecting a priority and saving updates the task's priority in the database",
+        "Form pre-selects the task's current priority when editing",
+        "Integration test verifies priority is persisted after form submission"
+      ],
+      "validationCommand": "npm test -- --grep 'priority selector'",
+      "refined": true,
+      "passes": false
+    },
+    {
+      "id": "S-004",
+      "title": "Add priority filter to task list",
+      "priority": 4,
+      "acceptanceCriteria": [
+        "Filter bar shows buttons: All | High | Medium | Low",
+        "Clicking a filter shows only tasks of that priority",
+        "'All' is selected by default and shows all tasks",
+        "Active filter is visually highlighted",
+        "Filter state is preserved in URL query parameter (?priority=high)",
+        "Empty state shows 'No tasks with this priority' when filter has no results",
+        "Unit test verifies filter logic returns correct subset of tasks"
+      ],
+      "validationCommand": "npm test -- --grep 'priority filter'",
+      "refined": true,
+      "passes": false
+    }
+  ]
+}

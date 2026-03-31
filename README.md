@@ -9,12 +9,19 @@ Inspired by the [Ralph Loop](https://github.com/snarktank/ralph) pattern — but
 ## Install
 
 ```bash
-# From GitHub
-/plugin install skillhub-club/specloop
+# 1. Add the marketplace
+/plugin marketplace add skillhub-club/specloop
 
-# Or clone locally
+# 2. Install the plugin
+/plugin install spec-loop@specloop-marketplace
+```
+
+Or install from a local clone:
+
+```bash
 git clone https://github.com/skillhub-club/specloop.git
-/plugin install ./specloop
+/plugin marketplace add ./specloop
+/plugin install spec-loop@specloop-marketplace
 ```
 
 ## Quick Start
@@ -102,26 +109,35 @@ The **Stop hook** intercepts Claude's exit attempts and re-feeds the prompt, cre
 /spec-loop --max-iterations 20 Build the priority system
 ```
 
-## Plugin Structure
+## Repository Structure
 
 ```
-spec-loop/
+specloop/                              # Marketplace repo
 ├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest
-├── commands/
-│   ├── spec-loop.md             # /spec-loop command
-│   ├── spec.md                  # /spec command
-│   ├── spec-loop-status.md      # /spec-loop-status command
-│   └── cancel-spec-loop.md      # /cancel-spec-loop command
-├── hooks/
-│   ├── hooks.json               # Stop hook registration
-│   └── stop-hook.sh             # Loop continuation logic
-├── scripts/
-│   ├── setup-spec-loop.sh       # Loop initialization
-│   └── prompts/
-│       ├── spec-refine.md       # Phase 1 prompt template
-│       └── implement.md         # Phase 2 prompt template
-├── spec.json.example            # Example spec format
+│   └── marketplace.json               # Marketplace catalog
+├── plugins/
+│   └── spec-loop/                     # The plugin
+│       ├── .claude-plugin/
+│       │   └── plugin.json            # Plugin manifest
+│       ├── commands/
+│       │   ├── spec-loop.md           # /spec-loop — start the loop
+│       │   ├── spec.md                # /spec — generate spec.json
+│       │   ├── spec-loop-status.md    # /spec-loop-status
+│       │   └── cancel-spec-loop.md    # /cancel-spec-loop
+│       ├── hooks/
+│       │   ├── hooks.json             # Stop hook registration
+│       │   └── stop-hook.sh           # Loop continuation logic
+│       ├── scripts/
+│       │   ├── setup-spec-loop.sh     # Loop initialization
+│       │   └── prompts/
+│       │       ├── spec-refine.md     # Phase 1 prompt
+│       │       └── implement.md       # Phase 2 prompt
+│       └── skills/
+│           └── spec-generator/
+│               └── SKILL.md           # Auto-invoked spec generation
+├── flowchart/                         # Interactive visualization (React + TS)
+├── spec.json.example                  # Example spec format
+├── CLAUDE.md                          # Project docs
 └── README.md
 ```
 

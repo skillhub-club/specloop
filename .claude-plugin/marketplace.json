@@ -1,23 +1,28 @@
 {
   "name": "specloop-marketplace",
   "owner": {
-    "name": "skillhub-club"
+    "name": "skillhub-club",
+    "email": "skillhub@proton.me"
   },
   "metadata": {
-    "description": "Two-phase autonomous AI loop for Claude Code: refine specs into machine-verifiable criteria, then implement them iteratively. Inspired by Ralph Loop with spec-first thinking.",
+    "description": "Two-phase autonomous AI loop for Claude Code: refine specs into machine-verifiable criteria, then implement them iteratively.",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "spec-loop",
-      "source": "./",
-      "description": "Autonomous spec refinement and implementation loop with Stop hook for long-running sessions",
+      "source": "./plugins/spec-loop",
+      "description": "Autonomous two-phase loop: refine specs → implement iteratively. Uses a Stop hook to keep Claude running across iterations.",
       "version": "1.0.0",
-      "keywords": ["spec-loop", "ralph-loop", "autonomous", "specification", "iteration", "loop", "implementation"],
+      "author": {
+        "name": "skillhub-club"
+      },
+      "homepage": "https://skillhub-club.github.io/specloop/",
+      "repository": "https://github.com/skillhub-club/specloop",
+      "license": "MIT",
+      "keywords": ["spec-loop", "ralph-loop", "autonomous", "specification", "iteration", "loop"],
       "category": "productivity",
-      "skills": "./skills/",
-      "commands": "./commands/",
-      "hooks": "./hooks/"
+      "tags": ["ai-loop", "coding-agent", "spec-first", "ralph-wiggum"]
     }
   ]
 }
